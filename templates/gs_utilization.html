@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LEO Simulator Web App - Ground Station Utilization</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        .back-button {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #f1f1f1;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .back-button:hover {
+            background-color: #ddd;
+        }
+        
+        #map-container {
+            height: 700px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .legend {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            min-width: 150px;
+        }
+        
+        .gradient-legend {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right, 
+                rgb(0, 255, 0),   /* Green (0.0) */
+                rgb(255, 255, 0), /* Yellow (0.5) */
+                rgb(255, 0, 0)    /* Red (1.0) */
+            );
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .info-box {
+            padding: 10px 12px;
+            font: 16px/18px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            min-width: 200px;
+        }
+
+        .info-box h4 {
+            margin: 0 0 5px;
+            font-size: 18px;
+        }
+
+        /* Styles copied from heatmap.html for consistency */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+
+        .form-group {
+            width: calc(33.33% - 20px);
+            margin: 0 10px 10px;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-group {
+                width: 100%;
+            }
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 20px;
+        }
+
+        button[type="submit"] {
+            margin-top: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0069d9;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Assessing LEO Satellite Networks for National Emergency Failover</h1>
+        
+        <form method="POST">
+            <div class="form-row">
+                {% for param, options in config_options.items() %}
+                <div class="form-group">
+                    <label>{{ param }}</label>
+                    <select name="{{ param }}">
+                        {% for option in options %}
+                        <option value="{{ option }}" {% if current_params[param] == option %}selected{% endif %}>
+                            {{ option }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit">Show Results</button>
+        </form>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <div id="map-container">
+            <div class="loading">Loading map...</div>
+        </div>
+        
+        <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map once the page has loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we have ground station data
+            const gsDataElement = document.getElementById('gs-data');
+            
+            // Initialize the map centered on the world
+            const map = L.map('map-container').setView([20, 0], 2);
+            
+            // Add the base tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Function to get color based on utilization value
+            function getColor(utilization) {
+                // Use the same color logic as in the heatmap
+                if (utilization <= 0.5) {
+                    // Green (0) to Yellow (0.5)
+                    const greenValue = 255;
+                    const redValue = Math.round(255 * 2 * utilization);
+                    return `rgb(${redValue}, ${greenValue}, 0)`;
+                } else {
+                    // Yellow (0.5) to Red (1.0)
+                    const redValue = 255;
+                    const greenValue = Math.round(255 * 2 * (1 - utilization));
+                    return `rgb(${redValue}, ${greenValue}, 0)`;
+                }
+            }
+            
+            // Create a legend control
+            const legend = L.control({ position: 'bottomright' });
+            
+            // Define what the legend contains
+            legend.onAdd = function(map) {
+                const div = L.DomUtil.create('div', 'legend');
+                
+                div.innerHTML = `
+                    <h4>Utilization</h4>
+                    <div class="gradient-legend"></div>
+                    <div class="legend-labels">
+                        <span>0.0</span>
+                        <span>0.5</span>
+                        <span>1.0</span>
+                    </div>
+                `;
+                
+                return div;
+            };
+            
+            // Add the legend to the map
+            legend.addTo(map);
+            
+            // Create an info control for displaying ground station details
+            const info = L.control({ position: 'topright' });
+            
+            // Define what the info contains
+            info.onAdd = function(map) {
+                this._div = L.DomUtil.create('div', 'info-box');
+                this.update();
+                return this._div;
+            };
+            
+            // Method to update the info control with ground station data
+            info.update = function(props) {
+                this._div.innerHTML = props ? 
+                    '<h4>' + props.name + '</h4>' +
+                    'ID: ' + props.id + '<br>' +
+                    'Utilization: ' + props.utilization.toFixed(3) :
+                    '<h4>Ground Station Info</h4>Hover over a ground station';
+            };
+            
+            // Add the info control to the map
+            info.addTo(map);
+            
+            // If we have ground station data from the server, display it
+            {% if gs_data %}
+                const gsData = {{ gs_data|safe }};
+                
+                // Remove the loading message
+                document.querySelector('.loading').style.display = 'none';
+                
+                // Add markers for each ground station
+                gsData.forEach(function(station) {
+                    // Create a circle marker with size based on importance and color based on utilization
+                    const marker = L.circleMarker([station.lat, station.lng], {
+                        radius: 8,
+                        fillColor: getColor(station.utilization),
+                        color: '#000',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+                    
+                    // Add hover and click events
+                    marker.on('mouseover', function(e) {
+                        this.setStyle({
+                            weight: 3,
+                            fillOpacity: 1
+                        });
+                        info.update(station);
+                    });
+                    
+                    marker.on('mouseout', function(e) {
+                        this.setStyle({
+                            weight: 1,
+                            fillOpacity: 0.8
+                        });
+                        info.update();
+                    });
+                    
+                    // Add a popup with basic information
+                    marker.bindPopup(
+                        '<strong>' + station.name + '</strong><br>' +
+                        'ID: ' + station.id + '<br>' +
+                        'Utilization: ' + station.utilization.toFixed(3)
+                    );
+                });
+            {% else %}
+                // If no data, show a message
+                document.querySelector('.loading').innerHTML = 'Select parameters and click "Show Results" to view ground station utilization';
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

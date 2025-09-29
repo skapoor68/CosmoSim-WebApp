@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LEO Simulator Web App</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        
+        .nav-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assessing LEO Satellite Networks for National Emergency Failover</h1>
+        
+        <div class="button-container">
+            <a href="{{ url_for('heatmap') }}" class="nav-button">Capacity degradation heatmap</a>
+            <a href="{{ url_for('gs_utilization') }}" class="nav-button">Ground station utilization</a>
+        </div>
+    </div>
+</body>
+</html>
