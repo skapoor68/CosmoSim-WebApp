@@ -1,0 +1,10 @@
+851f4023fffffff,5040.0
+851f4033fffffff,7520.0
+851f4037fffffff,8880.0
+851f403bfffffff,6100.0
+851f404bfffffff,7520.0
+851f40affffffff,6320.0
+851f40c3fffffff,7520.0
+851f40d3fffffff,6320.0
+851f40dbfffffff,8800.0
+851f44a3fffffff,7600.0

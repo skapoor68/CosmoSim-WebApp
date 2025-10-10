@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LEO Simulator Web App - Country Capacity</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        /* Copied styles from heatmap.html for consistency */
+        .back-button {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #f1f1f1;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .back-button:hover {
+            background-color: #ddd;
+        }
+
+        /* Clean grid layout for form */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 18px;
+        }
+
+        button[type="submit"] {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button[type="submit"]:hover {
+            background-color: #0069d9;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .result h3 {
+            margin-top: 0;
+        }
+        .map-frame {
+            height: 700px;
+            width: 100%;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid red;
+            border-radius: 4px;
+            background-color: #fdd;
+        }
+
+        /* Optional: consistent label width for uniform alignment */
+        @media (min-width: 768px) {
+            .form-group label {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Country Per Cell Capacity Map</h1>
+        
+        <form method="POST">
+            <div class="form-row">
+                {% for param, options in config_options.items() %}
+                    <div class="form-group">
+                        <label for="{{ param }}">{{ param }}</label>
+                        <select name="{{ param }}" id="{{ param.replace(' ', '_') }}">
+                            {% if param != 'Number of terminals' %}
+                                {% for option in options %}
+                                    <option value="{{ option }}" {% if current_params[param] == option %}selected{% endif %}>
+                                        {{ option }}
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit">Generate Visualization</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if viz_path %}
+            <div class="result">
+                <h3>Per Cell Capacity Map</h3>
+                <iframe class="map-frame" src="{{ url_for('static', filename=viz_path) }}"></iframe>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const countryTerminals = {{ country_terminals|tojson }};
+            const countrySelect = document.getElementById('Country');
+            const terminalsSelect = document.getElementById('Number_of_terminals');
+
+            function updateTerminals(selectedCountry, selectedTerminal) {
+                const countryKey = selectedCountry.toLowerCase().replace(' ', '');
+                const data = countryTerminals[countryKey] || [];
+                terminalsSelect.innerHTML = '';
+                data.forEach(terminal => {
+                    const option = document.createElement('option');
+                    option.value = terminal;
+                    option.textContent = terminal;
+                    if (selectedTerminal && terminal == selectedTerminal) {
+                        option.selected = true;
+                    }
+                    terminalsSelect.appendChild(option);
+                });
+                terminalsSelect.disabled = data.length === 0;
+            }
+
+            countrySelect.addEventListener('change', function() {
+                updateTerminals(this.value, null);
+            });
+
+            const initialCountry = countrySelect.value;
+            const initialTerminal = '{{ current_params["Number of terminals"] }}';
+            if (initialCountry) {
+                updateTerminals(initialCountry, initialTerminal);
+            } else {
+                terminalsSelect.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>

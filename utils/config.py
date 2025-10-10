@@ -47,3 +47,31 @@ COUNTRY_CONFIGS = {
     'Lithuania': {'latitude': 55.1694, 'longitude': 23.8813, 'zoom': 6},
     'Haiti': {'latitude': 18.9712, 'longitude': -72.2852, 'zoom': 7}
 }
+
+# --- New configurations for the Country Capacity page ---
+
+# Terminal numbers specific to each country
+COUNTRY_TERMINALS = {
+    "southafrica": [1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000],
+    "ghana": [1000,2000,5000,10000,20000,50000,100000,200000,500000],
+    "tonga": [100,200,500,1000,2000,5000,10000,20000,50000],
+    "lithuania": [1000,2000,5000,10000,20000,50000,100000,200000,500000],
+    "britain": [1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000],
+    "haiti": [1000,2000,5000,10000,20000,50000,100000,200000,500000]
+}
+
+# Configuration options for the Country Capacity page form
+COUNTRY_CAPACITY_CONFIG_OPTIONS = {
+    'Country': ['South Africa', 'Ghana', 'Tonga', 'Lithuania', 'Britain', 'Haiti'],
+    'Number of terminals': [], # This will be populated dynamically via JavaScript
+    'User terminal distribution algorithm': ['Population density', 'GCB No Cap', 'GCB 1K', 'GCB 10K', 'GCB 100K'],
+    'Beam allocation': ['Priority', 'Population waterfill']
+}
+
+# Default parameters for the Country Capacity page
+COUNTRY_CAPACITY_DEFAULT_PARAMS = {
+    'Country': 'Britain',
+    'Number of terminals': '20000',
+    'User terminal distribution algorithm': 'Population density',
+    'Beam allocation': 'Priority'
+}

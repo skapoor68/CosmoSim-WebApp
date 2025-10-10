@@ -1,0 +1,4 @@
+859a2e8ffffffff,10240.0
+859b01a7fffffff,10240.0
+859b0cd7fffffff,10240.0
+859b19b7fffffff,10240.0

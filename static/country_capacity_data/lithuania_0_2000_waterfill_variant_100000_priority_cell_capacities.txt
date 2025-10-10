@@ -1,0 +1,4 @@
+851f4033fffffff,6400.0
+851f4037fffffff,7680.0
+851f40c3fffffff,6400.0
+851f40d3fffffff,6400.0

@@ -1,4 +1,5 @@
 static/*data
+!static/country_capacity_data
 static/visualizations
 __pycache__
 .venv
