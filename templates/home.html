@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>LEO Simulator Web App</title>
+    <title>CosmoSim Web App</title>
     <link rel="stylesheet" href="../static/style.css">
     <style>
         .button-container {
@@ -32,12 +32,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>Assessing LEO Satellite Networks for National Emergency Failover</h1>
+        <h1>CosmoSim Web App</h1>
+        <h2>Assessing LEO Satellite Networks for National Emergency Failover | IMC 2025</h2>
         
         <div class="button-container">
-            <a href="{{ url_for('country_capacity') }}" class="nav-button">Country per cell capacity</a>
-            <a href="{{ url_for('heatmap') }}" class="nav-button">Capacity degradation heatmap</a>
-            <a href="{{ url_for('gs_utilization') }}" class="nav-button">Ground station utilization</a>
+            <a href="country_capacity.html" class="nav-button">Country per cell capacity</a>
+            <a href="gs_utilizations.html" class="nav-button">Ground station utilization</a>
+            <a href="heatmap.html" class="nav-button">Capacity degradation heatmap</a>
         </div>
     </div>
 </body>
