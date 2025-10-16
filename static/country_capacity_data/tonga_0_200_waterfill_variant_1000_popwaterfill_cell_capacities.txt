@@ -1,2 +1,0 @@
-859b0cd7fffffff,10080.0
-859b19b7fffffff,9760.0

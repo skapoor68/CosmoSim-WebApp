@@ -1,4 +1,0 @@
-859a2e8ffffffff,1200.0
-859b01a7fffffff,4300.0
-859b0cd7fffffff,7680.0
-859b19b7fffffff,8960.0
