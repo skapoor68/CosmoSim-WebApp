@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CosmoSim Web App</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        
+        .nav-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CosmoSim Web App</h1>
+        <h2>Assessing LEO Satellite Networks for National Emergency Failover | IMC 2025</h2>
+        
+        <div class="button-container">
+            <a href="country_capacity.html" class="nav-button">Country per cell capacity</a>
+            <a href="gs_utilizations.html" class="nav-button">Ground station utilization</a>
+            <a href="cell_heatmap.html" class="nav-button">Capacity degradation heatmap</a>
+        </div>
+    </div>
+</body>
+</html>
