@@ -3,94 +3,7 @@
 <head>
     <title>CosmoSim Web App - Capacity Degradation</title>
     <link rel="stylesheet" href="../static/style.css">
-    <style>
-        .back-button {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #f1f1f1;
-            color: black;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .back-button:hover {
-            background-color: #ddd;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            align-items: start;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            font-size: 20px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 18px;
-        }
-        button[type="button"] {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button[type="button"]:hover {
-            background-color: #0069d9;
-        }
-        .result {
-            display: none; /* Initially hide the result container */
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-        .result h3 {
-            margin-top: 0;
-        }
-        .map-frame {
-            height: 700px;
-            width: 100%;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .error {
-            display: none; /* Initially hide the error message */
-            color: red;
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid red;
-            border-radius: 4px;
-            background-color: #fdd;
-        }
-        
-        @media (min-width: 768px) {
-            .form-group label {
-                min-width: 200px;
-            }
-        }
-    </style>
-</head>
+    </head>
 <body>
     <div class="container">
         <h1>Capacity Degradation Heatmap</h1>
@@ -133,57 +46,19 @@
         <div id="error-container" class="error"></div>
 
         <div id="result-container" class="result">
-            <h3>Capacity Degradation Map</h3>
             <iframe id="map-frame" class="map-frame" src=""></iframe>
         </div>
         
         <a href="home.html" class="back-button">Back to Home</a>
     </div>
 
+    <script src="../static/viz_logic.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- MAPPINGS ---
-            const countryMap = {
-                'Britain': 'britain', 'Ghana': 'ghana', 'South Africa': 'southafrica',
-                'Tonga': 'tonga', 'Lithuania': 'lithuania', 'Haiti': 'haiti'
-            };
-            const terminalsCapMap = { '200000 / 10K': '200000_10000' };
-            const demandMap = {
-                '8400 Mbps': '0.7', '9600 Mbps': '0.8', 
-                '10800 Mbps': '0.9', '12000 Mbps': '1.0'
-            };
-
-            // --- ELEMENT SELECTORS ---
-            const generateBtn = document.getElementById('generate-btn');
-            const mapFrame = document.getElementById('map-frame');
-            const resultContainer = document.getElementById('result-container');
-            const errorContainer = document.getElementById('error-container');
-
-            // --- VISUALIZATION LOGIC ---
-            generateBtn.addEventListener('click', function() {
-                // 1. Get current values from all dropdowns
-                const countryVal = document.getElementById('country-select').value;
-                const terminalsCapVal = document.getElementById('terminals-cap-select').value;
-                const demandVal = document.getElementById('demand-select').value;
-
-                // 2. Map values to filename components
-                const countryFn = countryMap[countryVal];
-                const terminalsCapFn = terminalsCapMap[terminalsCapVal];
-                const demandFn = demandMap[demandVal];
-                
-                // 3. Construct the filename
-                const filename = `${countryFn}_${terminalsCapFn}_${demandFn}_cell_heatmap.html`;
-                
-                // 4. Construct the path for the iframe
-                const vizPath = `../static/visualizations/cell_heatmaps/${filename.toLowerCase()}`;
-                console.log('Loading visualization from:', vizPath);
-                
-                // 5. Update the iframe and UI
-                mapFrame.src = vizPath;
-                resultContainer.style.display = 'block';
-                errorContainer.style.display = 'none';
-            });
-        });
+        // Alias maps from viz_logic.js to what this page's script expects
+        const countryMap = countryMapHeatmap;
+        const terminalsCapMap = terminalsCapMapHeatmap;
+        const demandMap = demandMapHeatmap;
     </script>
+    <script src="../static/cell_heatmap.app.js"></script>
 </body>
 </html>

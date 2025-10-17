@@ -1,7 +1,7 @@
 import pandas as pd
 import pydeck as pdk
 import os
-import numpy as np # <-- ADDED THIS IMPORT
+import numpy as np
 
 # This data is needed for setting the map's initial view (latitude, longitude, zoom)
 COUNTRY_CONFIGS = {
@@ -13,7 +13,8 @@ COUNTRY_CONFIGS = {
     'Haiti': {'latitude': 18.9712, 'longitude': -72.2852, 'zoom': 7}
 }
 
-def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, config_name):
+# --- Function signature still accepts 'scale_min' ---
+def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, config_name, scale_min):
     """
     Generates and saves a pydeck map visualization for capacity degradation.
     """
@@ -29,6 +30,21 @@ def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, 
         get_fill_color=[0, 0, 255, 200]
     )
 
+    scale_max = 1.0
+    
+    if (scale_max - scale_min) == 0:
+        norm_expr = "1.0" # If min=max, just use a single color (e.g., green)
+    else:
+        min_str = f"{scale_min:.10f}"
+        range_str = f"{(scale_max - scale_min):.10f}"
+        
+        # This is the raw normalization: (value - min) / (max - min)
+        raw_norm_expr = f"((value - {min_str}) / {range_str})"
+        norm_expr = f"({raw_norm_expr} < 0.0 ? 0.0 : ({raw_norm_expr} > 1.0 ? 1.0 : {raw_norm_expr}))"
+
+    color_expr = f"[{norm_expr} <= 0.5 ? 255 : 255 * 2 * (1 - {norm_expr}), {norm_expr} <= 0.5 ? 255 * 2 * {norm_expr} : 255, 0, 185]"
+
+
     # 2. Layer for non-nation heatmap cells (gradient)
     heatmap_layer = pdk.Layer(
         "H3HexagonLayer",
@@ -38,10 +54,9 @@ def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, 
         filled=True,
         extruded=False,
         get_hexagon="hex",
-        # Color gradient: Red (0.0) -> Yellow (0.5) -> Green (1.0)
-        get_fill_color="[value <= 0.5 ? 255 : 255 * 2 * (1 - value), value <= 0.5 ? 255 * 2 * value : 255, 0, 185]",
+        get_fill_color=color_expr,
         get_line_color=[255, 255, 255],
-        line_width_min_pixels=2, # FIX: Added this line to ensure strokes are visible
+        line_width_min_pixels=2,
     )
 
     # Set the initial viewport based on the selected country
@@ -56,7 +71,6 @@ def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, 
     r = pdk.Deck(
         layers=[nation_layer, heatmap_layer],
         initial_view_state=view_state,
-        # --- CHANGE 2: Reference the new 'truncated_value' column ---
         tooltip={"text": "Available capacity:\n {truncated_value}"},
         map_style="light",
     )
@@ -75,6 +89,20 @@ def create_heatmap_map(nation_cells_df, heatmap_cells_df, country_display_name, 
     if os.path.exists(color_scale_path):
         with open(color_scale_path, 'r') as f:
             color_scale_html = f.read()
+        
+        # --- Dynamically update legend labels (this part is unchanged) ---
+        scale_mid = (scale_min + scale_max) / 2
+        # Format to one decimal place for the label
+        min_label = f"{scale_min:.1f}"
+        mid_label = f"{scale_mid:.1f}"
+        max_label = f"{scale_max:.1f}"
+        
+        # Replace the static labels in the HTML string
+        color_scale_html = color_scale_html.replace('<span>0.0</span>', f'<span>{min_label}</span>')
+        color_scale_html = color_scale_html.replace('<span>0.5</span>', f'<span>{mid_label}</span>')
+        color_scale_html = color_scale_html.replace('<span>1.0</span>', f'<span>{max_label}</span>')
+        
+        # Inject the *modified* HTML into the body
         html_content = html_content.replace('</body>', f'{color_scale_html}</body>')
     
     with open(html_path, 'w') as f:
@@ -122,7 +150,7 @@ def generate_all_visualizations():
                         # Read heatmap data (non-nation cells)
                         heatmap_df = pd.read_csv(heatmap_path, header=None, names=['hex', 'value'])
 
-                        # --- CHANGE 1: Create a new column with the truncated value ---
+                        # Create a new column with the truncated value
                         heatmap_df['truncated_value'] = np.floor(heatmap_df['value'] * 1000) / 1000
                         
                         # Read nation cell data and filter for those with > 0 terminals
@@ -130,7 +158,11 @@ def generate_all_visualizations():
                         nation_df_filtered = nation_df[nation_df['terminals'] > 0]
 
                         if not heatmap_df.empty and not nation_df_filtered.empty:
-                            create_heatmap_map(nation_df_filtered, heatmap_df, country_display, config_name)
+                            
+                            min_val = heatmap_df['value'].min()
+                            scale_min = np.floor(min_val * 10) / 10
+                            
+                            create_heatmap_map(nation_df_filtered, heatmap_df, country_display, config_name, scale_min)
                             generated_count += 1
                         else:
                             print(f"    - SKIPPED (one or more data files are empty): {config_name}")
@@ -142,7 +174,7 @@ def generate_all_visualizations():
                     skipped_count += 1
     
     print("\n--------------------------------------------------")
-    print("            Generation Complete                   ")
+    print("                Generation Complete                ")
     print(f"    Total HTML files generated: {generated_count}")
     print(f"    Total configurations skipped: {skipped_count}")
     print("--------------------------------------------------")

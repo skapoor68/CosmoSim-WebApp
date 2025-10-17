@@ -6,8 +6,8 @@
 }
 
 :root {
-    --primary: #0ea5e9;
-    --primary-dark: #0284c7;
+    --primary: #007bff;
+    --primary-dark: #0069d9;
     --background: #f8fafc;
     --text: #0f172a;
     --error: #ef4444;
@@ -96,7 +96,7 @@ select:hover {
 select:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); /* Updated color for focus shadow */
 }
 
 button {
@@ -132,6 +132,7 @@ button:active {
     width: 100%;
     max-width: 400px;
     text-align: center;
+    display: none; /* Hide by default */
 }
 
 /* Map container */
@@ -140,6 +141,7 @@ button:active {
     max-width: 1400px;
     margin-top: 2rem;
     padding: 0 1rem;
+    display: none; /* Hide by default */
 }
 
 .map-frame {
@@ -149,4 +151,43 @@ button:active {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     background: white;
+}
+
+/* --- ADDED FROM REFACTOR --- */
+.back-button {
+    display: inline-block;
+    background: #f1f1f1;
+    color: black;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+.back-button:hover {
+    background: #ddd;
+    border-color: #ccc;
+}
+
+/* Added to support forms on individual pages */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    align-items: start;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 1.5rem;
+}
+.form-row .form-group {
+    max-width: none; /* Override max-width inside a form-row */
+}
+.form-row button {
+    margin-top: 1.75rem; /* Align button with dropdowns */
+    min-width: auto;
 }

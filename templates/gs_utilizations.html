@@ -3,94 +3,7 @@
 <head>
     <title>CosmoSim Web App - Ground Station Utilization</title>
     <link rel="stylesheet" href="../static/style.css">
-    <style>
-        .back-button {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #f1f1f1;
-            color: black;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .back-button:hover {
-            background-color: #ddd;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            align-items: start;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            font-size: 20px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 18px;
-        }
-        button[type="button"] { /* Changed from type="submit" */
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button[type="button"]:hover {
-            background-color: #0069d9;
-        }
-        .result {
-            display: none; /* Initially hide the result container */
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-        .result h3 {
-            margin-top: 0;
-        }
-        .map-frame {
-            height: 700px;
-            width: 100%;
-            margin-top: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .error {
-            display: none; /* Initially hide the error message */
-            color: red;
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid red;
-            border-radius: 4px;
-            background-color: #fdd;
-        }
-        
-        @media (min-width: 768px) {
-            .form-group label {
-                min-width: 200px;
-            }
-        }
-    </style>
-</head>
+    </head>
 <body>
     <div class="container">
         <h1>Ground Station Utilization Map</h1>
@@ -136,7 +49,6 @@
         <div id="error-container" class="error"></div>
 
         <div id="result-container" class="result">
-            <h3>Ground Station Utilization Map</h3>
             <iframe id="map-frame" class="map-frame" src=""></iframe>
         </div>
 
@@ -144,89 +56,7 @@
 
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- DATA AND MAPPINGS ---
-            const countryTerminals = {
-                "southafrica": [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000],
-                "ghana": [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000],
-                "tonga": [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000],
-                "lithuania": [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000],
-                "britain": [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000],
-                "haiti": [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000]
-            };
-            const utAlgoMap = {
-                'Population density': 'population', 'GCB No Cap': 'waterfill', 'GCB 1K': 'waterfill_variant_1000',
-                'GCB 10K': 'waterfill_variant_10000', 'GCB 100K': 'waterfill_variant_100000'
-            };
-            const beamAllocMap = { 'Priority': 'priority', 'Population waterfill': 'popwaterfill' };
-
-            // --- ELEMENT SELECTORS ---
-            const countrySelect = document.getElementById('Country');
-            const terminalsSelect = document.getElementById('Number_of_terminals');
-            const generateBtn = document.getElementById('generate-btn');
-            const mapFrame = document.getElementById('map-frame');
-            const resultContainer = document.getElementById('result-container');
-            const errorContainer = document.getElementById('error-container');
-
-            // --- DYNAMIC DROPDOWN LOGIC ---
-            function updateTerminals(selectedCountry, selectedTerminal) {
-                const countryKey = selectedCountry.toLowerCase().replace(' ', '');
-                const data = countryTerminals[countryKey] || [];
-                terminalsSelect.innerHTML = '';
-                data.forEach(terminal => {
-                    const option = document.createElement('option');
-                    option.value = terminal;
-                    option.textContent = terminal;
-                    if (selectedTerminal && terminal == selectedTerminal) {
-                        option.selected = true;
-                    }
-                    terminalsSelect.appendChild(option);
-                });
-                terminalsSelect.disabled = data.length === 0;
-            }
-
-            countrySelect.addEventListener('change', function() {
-                updateTerminals(this.value, null);
-            });
-
-            // Initialize terminals for the default selected country
-            updateTerminals(countrySelect.value, '20000');
-            
-            // --- VISUALIZATION LOGIC ---
-            generateBtn.addEventListener('click', function() {
-                // 1. Get current values from all dropdowns
-                const countryVal = countrySelect.value;
-                const terminalsVal = terminalsSelect.value;
-                const utAlgoVal = document.getElementById('User_terminal_distribution_algorithm').value;
-                const beamAllocVal = document.getElementById('Beam_allocation').value;
-
-                // 2. Map values to filename components
-                const countryFn = countryVal.toLowerCase().replace(' ', '');
-                const utAlgoFn = utAlgoMap[utAlgoVal];
-                const beamAllocFn = beamAllocMap[beamAllocVal];
-
-                if (!terminalsVal) {
-                    errorContainer.textContent = 'Please select a valid number of terminals.';
-                    errorContainer.style.display = 'block';
-                    resultContainer.style.display = 'none';
-                    return;
-                }
-                
-                // 3. Construct the filename. Assume the naming convention is consistent with country capacity files.
-                // e.g., britain_0_20000_population_priority_gs_utilization.html
-                const filename = `${countryFn}_0_${terminalsVal}_${utAlgoFn}_${beamAllocFn}_gs_utilizations.html`;
-                
-                // 4. Construct the path for the iframe, pointing to the gs_utilizations directory
-                const vizPath = `../static/visualizations/gs_utilizations/${filename.toLowerCase()}`;
-                console.log('Loading visualization from:', vizPath);
-                
-                // 5. Update the iframe and UI
-                mapFrame.src = vizPath;
-                resultContainer.style.display = 'block';
-                errorContainer.style.display = 'none';
-            });
-        });
-    </script>
+    <script src="../static/viz_logic.js"></script>
+    <script src="../static/gs_utilizations.app.js"></script>
 </body>
 </html>
