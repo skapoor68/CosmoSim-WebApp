@@ -138,10 +138,12 @@ button:active {
 /* Map container */
 .result {
     width: 100%;
-    max-width: 1400px;
+    max-width: 2200px;
     margin-top: 2rem;
     padding: 0 1rem;
-    display: none; /* Hide by default */
+    display: none;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .map-frame {
@@ -153,7 +155,6 @@ button:active {
     background: white;
 }
 
-/* --- ADDED FROM REFACTOR --- */
 .back-button {
     display: inline-block;
     background: #f1f1f1;
