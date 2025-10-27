@@ -74,14 +74,10 @@ body {
 }
 
 .abstract-container {
-  background: white;
   width: 95%;
   margin: 0 auto 2rem;
-  padding: 2rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
   box-sizing: border-box;
-  text-align: left;
+  text-align: center;
 }
 
 .viz-section-container {
@@ -116,11 +112,14 @@ body {
 }
 
 .abstract-container p {
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   color: #475569;
   line-height: 1.7;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
+  border-left: 5px solid var(--border, #e2e8f0);
+  padding-left: 1.5rem;
+  text-align: left; 
 }
 
 .viz-wrapper {
@@ -155,7 +154,7 @@ body {
   width: 100%;
   min-width: unset;
   /* Align button with dropdowns (which have labels) */
-  margin-top: 1.75rem; 
+  margin-top: 1.75rem;
 }
 
 .outputs-container {
@@ -251,6 +250,9 @@ body {
   .outputs-container {
     width: 100%;
   }
+  .abstract-container {
+    padding: 0 1.75rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -300,5 +302,8 @@ body {
   }
   .viz-section-container .result h3 {
     font-size: 1.1rem;
+  }
+  .abstract-container {
+    padding: 0 1.25rem;
   }
 }
