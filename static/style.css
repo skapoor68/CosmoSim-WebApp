@@ -144,6 +144,7 @@ button:active {
     display: none;
     margin-left: auto;
     margin-right: auto;
+    position: relative;
 }
 
 .loading-indicator {
@@ -156,10 +157,14 @@ button:active {
     color: #475569;
     padding: 1.5rem 0;
     text-align: center;
+    pointer-events: none;
 }
 
 .loading-indicator.active {
     display: flex;
+    position: absolute;
+    inset: 0;
+    background: rgb(248 250 252 / 0.8);
 }
 
 .loading-spinner {
