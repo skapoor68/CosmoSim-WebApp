@@ -288,3 +288,18 @@ button:active {
         text-align: center;
     }
 }
+
+.site-footer {
+  width: 100%;
+  text-align: center;
+  color: #475569;
+  font-size: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 1.5rem 1rem; 
+    font-size: 0.875rem;
+  }
+}
